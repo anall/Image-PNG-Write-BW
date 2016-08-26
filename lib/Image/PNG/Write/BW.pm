@@ -22,14 +22,11 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+Turns a variety of raw black-and-white (1bpp) image representations into a minimal PNG image format.
 
-Perhaps a little code snippet.
+    use Image::PNG::Write::BW qw( make_png_string );
 
-    use Image::PNG::Write::BW;
-
-    my $foo = Image::PNG::Write::BW->new();
-    ...
+    my $data = make_png_string( [ "# ", " #" ] ); # Returns a 2x2 repeatalbe grid pattern.
 
 =head1 EXPORT
 
@@ -38,7 +35,44 @@ if you don't export anything, such as for a purely object-oriented module.
 
 =head1 SUBROUTINES/METHODS
 
-=head2 make_png_bitstream_array( \@scanlines, $width );
+=head2 make_png_string( \@lines )
+
+Takes an arrayref of strings and turns them into a PNG. Whitespace characters are white, non-whitespace are black.
+
+For example: make_png_string( [ "###", "# #", "###" ] ) will make a 3x3 box with a hole in the middle.
+
+=cut
+
+sub make_png_string($) {
+    my ( $data ) = @_;
+
+    die "cannot make 0-height png" if @$data == 0;
+
+    my $deflate = Compress::Raw::Zlib::Deflate->new( -AppendOutput => 1 ) or die "failed to create Deflate module"; 
+    my $out;
+
+    my $width = undef;
+
+    foreach my $line ( @$data ) {
+      my $lineCp = $line; # We actually need a copy;
+      if ( ! defined $width ) {
+        $width = length( $lineCp );
+        die "cannot make 0-width png" if $width == 0;
+      }
+      die "all lines must have same width" if $width != length( $lineCp );
+
+      $lineCp =~ s/\S/1/g;
+      $lineCp =~ s/\s/0/g;
+
+      $deflate->deflate( pack("xB*",$lineCp) , $out ) == Z_OK or die "failed to deflate";
+    }
+    $deflate->flush( $out, Z_FINISH ) == Z_OK or die "failed to finish";
+
+    return _make_png_raw_idat( $out, $width, scalar( @$data ) );
+}
+
+
+=head2 make_png_bitstream_array( \@scanlines, $width )
  
 One bit per pixel, left-to-right on the image is high-bit to low-bit, lowest index to highest index. Each scanline passed as a seperate array element.
 
@@ -48,6 +82,9 @@ This currently copies each scanline.
 
 sub make_png_bitstream_array($$) {
     my ( $data, $width ) = @_;
+
+    die "cannot make 0-height png" if @$data == 0;
+    die "cannot make 0-width png" if $width <= 0;
 
     my $width_bytes = int( ( $width + 7 ) / 8 );
 
@@ -66,7 +103,6 @@ sub make_png_bitstream_array($$) {
     $deflate->flush( $out, Z_FINISH ) == Z_OK or die "failed to finish";
 
     return _make_png_raw_idat( $out, $width, scalar( @$data ) );
-
 }
 
 =head2 make_png_bitstream_packed( $scanlines, $width, $height );
@@ -75,12 +111,15 @@ One bit per pixel, left-to-right on the image is high-bit to low-bit, lowest ind
 
 This is the closest to the "native" PNG format.
 
-This currently copies each scanline.  If you have the ability to use the raw format ( prefix each line with \0 ) and use the make_png_bitstream_raw method, that may be more efficient.
+This currently copies each scanline.  If you have the ability to use the raw format ( prefix each line with \0 ), the make_png_bitstream_raw method may be more efficient.
 
 =cut
 
 sub make_png_bitstream_packed($$$) {
     my ( $data, $width, $height ) = ( \$_[0], $_[1], $_[2] );
+
+    die "cannot make 0-height png" if $height <= 0;
+    die "cannot make 0-width png"  if $width <= 0;
 
     my $width_bytes = int( ( $width + 7 ) / 8 );
     die "data has wrong number of bytes" unless $width_bytes*$height == length($$data);
@@ -109,6 +148,9 @@ This is the "native" format that PNG uses: One bit per pixel, left-to-right on t
 sub make_png_bitstream_raw($$$) {
     my ( $data, $width, $height ) = ( \$_[0], $_[1], $_[2] );
 
+    die "cannot make 0-height png" if $height <= 0;
+    die "cannot make 0-width png"  if $width <= 0;
+
     my $width_bytes = int( ( $width + 7 ) / 8 ) + 1;
     die "data has wrong number of bytes" unless $width_bytes*$height == length($$data);
 
@@ -122,6 +164,7 @@ sub make_png_bitstream_raw($$$) {
 
     return _make_png_raw_idat( $out, $width, $height );
 }
+
 
 # Internal method to make a PNG file from all parts ( including raw IDAT content )
 

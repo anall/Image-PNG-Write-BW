@@ -61,8 +61,8 @@ sub make_png_string($) {
       }
       die "all lines must have same width" if $width != length( $lineCp );
 
-      $lineCp =~ s/\S/1/g;
-      $lineCp =~ s/\s/0/g;
+      $lineCp =~ s/\S/0/g;
+      $lineCp =~ s/\s/1/g;
 
       $deflate->deflate( pack("xB*",$lineCp) , $out ) == Z_OK or die "failed to deflate";
     }

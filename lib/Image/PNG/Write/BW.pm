@@ -163,8 +163,6 @@ my $PNG_IEND      = _make_png_chunk( "IEND", "" );
 sub _make_png_raw_idat($$$) {
     my ( $data, $width, $height ) = ( \$_[0], $_[1], $_[2] );
 
-    my $ihdr = _make_png_chunk( "IHDR", pack("NNCCCCC",$width,$height,1,0,0,0,0) );
-
     return join("", $PNG_SIGNATURE,
         _make_png_chunk( "IHDR", pack("NNCCCCC",$width,$height,1,0,0,0,0) ),
         _make_png_chunk( "IDAT", $$data ),

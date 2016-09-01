@@ -7,6 +7,16 @@ use warnings FATAL => 'all';
 use Digest::CRC;
 use Compress::Raw::Zlib;
 
+use base 'Exporter';
+
+our @EXPORT_OK = qw(
+  make_png_string
+  make_png_bitstream_array
+  make_png_bitstream_packed
+  make_png_bitstream_raw
+);
+our %EXPORT_TAGS = ( all => \@EXPORT_OK );
+
 # ABSTRACT: Create minimal black-and-white PNG files.
 our $VERSION = '0.01';
 
@@ -131,7 +141,11 @@ sub make_png_bitstream_packed($$$) {
 
 =head2 make_png_bitstream_raw( $data, $width, $height );
 
-This is the "native" format that PNG uses: One bit per pixel, left-to-right on the image is high-bit to low-bit, lowest index to highest index. Each scanline starting on a byte boundary, with all scanlines packed into the same string. Every scanline must be prefixed by the filter type ( which should be \0 -- assumptions made in this function will not work unless all scanlines are the same length )
+This is the "native" format that PNG uses: One bit per pixel, left-to-right on the image is high-bit to low-bit, lowest index to highest index.
+
+Each scanline starting on a byte boundary, with all scanlines packed into the same string.
+
+Every scanline must be prefixed by the filter type (which should be \0, unless you know what you are doing.)
 
 =cut
 

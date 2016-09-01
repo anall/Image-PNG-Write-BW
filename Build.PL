@@ -25,15 +25,23 @@ my %module_build_args = (
   "requires" => {
     "Compress::Raw::Zlib" => 0,
     "Digest::CRC" => 0,
+    "Exporter" => 0,
+    "base" => 0,
     "perl" => "v5.10.0",
     "strict" => 0,
     "warnings" => 0
+  },
+  "test_requires" => {
+    "Test::BinaryData" => 0,
+    "Test::More" => 0
   }
 );
 
 
 my %fallback_build_requires = (
-  "Module::Build" => "0.28"
+  "Module::Build" => "0.28",
+  "Test::BinaryData" => 0,
+  "Test::More" => 0
 );
 
 

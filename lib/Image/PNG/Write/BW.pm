@@ -22,18 +22,13 @@ our $VERSION = '0.01';
 
 =head1 SYNOPSIS
 
-Turns a variety of raw black-and-white (1bpp) image representations into a minimal PNG image format.
+This is a pure-perl module to encode a variety of raw black-and-white (1bpp) image representations into a minimal PNG file.
 
     use Image::PNG::Write::BW qw( make_png_string );
 
     my $data = make_png_string( [ "# ", " #" ] ); # Returns a 2x2 repeatalbe grid pattern.
 
 =head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
 
 =head2 make_png_string( \@lines )
 

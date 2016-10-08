@@ -8,18 +8,13 @@ version 0.01
 
 # SYNOPSIS
 
-Turns a variety of raw black-and-white (1bpp) image representations into a minimal PNG image format.
+This is a pure-perl module to encode a variety of raw black-and-white (1bpp) image representations into a minimal PNG file.
 
     use Image::PNG::Write::BW qw( make_png_string );
 
     my $data = make_png_string( [ "# ", " #" ] ); # Returns a 2x2 repeatalbe grid pattern.
 
 # EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-# SUBROUTINES/METHODS
 
 ## make\_png\_string( \\@lines )
 
@@ -43,7 +38,11 @@ This currently copies each scanline.  If you have the ability to use the raw for
 
 ## make\_png\_bitstream\_raw( $data, $width, $height );
 
-This is the "native" format that PNG uses: One bit per pixel, left-to-right on the image is high-bit to low-bit, lowest index to highest index. Each scanline starting on a byte boundary, with all scanlines packed into the same string. Every scanline must be prefixed by the filter type ( which should be \\0 -- assumptions made in this function will not work unless all scanlines are the same length )
+This is the "native" format that PNG uses: One bit per pixel, left-to-right on the image is high-bit to low-bit, lowest index to highest index.
+
+Each scanline starting on a byte boundary, with all scanlines packed into the same string.
+
+Every scanline must be prefixed by the filter type (which should be \\0, unless you know what you are doing.)
 
 # AUTHOR
 
